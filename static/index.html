@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Technical Analysis Dashboard</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/chartjs-plugin-crosshair@2.0.0/dist/chartjs-plugin-crosshair.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@0.2.1/dist/chartjs-chart-financial.min.js"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">📊</span>
+                <h1>Stock Technical Analysis</h1>
+            </div>
+            <div class="search-container">
+                <div class="symbol-input-wrapper">
+                    <input type="text" id="symbolInput" placeholder="Enter symbol or company (e.g., TSLA, Tesla)"
+                        value="TSLA" autocomplete="off">
+                    <div class="autocomplete-dropdown" id="autocompleteDropdown"></div>
+                </div>
+                <select id="periodSelect">
+                    <option value="1mo">1 Month</option>
+                    <option value="3mo">3 Months</option>
+                    <option value="6mo" selected>6 Months</option>
+                    <option value="1y">1 Year</option>
+                    <option value="2y">2 Years</option>
+                </select>
+                <button id="analyzeBtn" class="btn-primary">
+                    <span class="btn-icon">🔍</span> Analyze
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Stock Info Bar -->
+            <div class="stock-info-bar" id="stockInfoBar">
+                <div class="stock-name">
+                    <h2 id="stockName">--</h2>
+                    <span class="stock-symbol" id="stockSymbol">--</span>
+                </div>
+                <div class="stock-price">
+                    <span class="current-price" id="currentPrice">--</span>
+                    <span class="price-change" id="priceChange">--</span>
+                </div>
+                <div class="stock-meta">
+                    <span id="stockSector">--</span>
+                    <span id="stockIndustry">--</span>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="charts-section">
+                <div class="chart-container chart-price">
+                    <div class="chart-header">
+                        <h3>Price & Moving Averages</h3>
+                        <div class="chart-controls">
+                            <button id="chartTypeToggle" class="btn-toggle active" data-type="line">
+                                📈 Line
+                            </button>
+                            <button id="candlestickToggle" class="btn-toggle" data-type="candlestick">
+                                🕯️ Candlestick
+                            </button>
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="priceChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Volume Chart -->
+                <div class="chart-container chart-volume">
+                    <div class="chart-header">
+                        <h3>Volume</h3>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="volumeChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- MACD Chart -->
+                <div class="chart-container chart-macd">
+                    <div class="chart-header">
+                        <h3>MACD</h3>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="macdChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- RSI Chart -->
+                <div class="chart-container chart-rsi">
+                    <div class="chart-header">
+                        <h3>RSI (14)</h3>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="rsiChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Signals & News Section -->
+            <div class="bottom-section">
+                <!-- Technical Signals -->
+                <div class="signals-panel">
+                    <h3>📈 Technical Signals</h3>
+                    <div class="signals-grid" id="signalsGrid">
+                        <div class="signal-card loading">Loading signals...</div>
+                    </div>
+                </div>
+
+                <!-- News Sentiment -->
+                <div class="news-panel">
+                    <h3>📰 News Sentiment</h3>
+                    <div class="sentiment-summary" id="sentimentSummary">
+                        <div class="loading">Loading news...</div>
+                    </div>
+                    <div class="news-list" id="newsList">
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Tooltip -->
+        <div class="custom-tooltip" id="customTooltip">
+            <div class="tooltip-content"></div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="loader"></div>
+            <p>Loading data...</p>
+        </div>
+    </div>
+
+    <script src="/static/app.js?v=3"></script>
+</body>
+
+</html>
