@@ -145,6 +145,49 @@ def search():
     })
 
 
+@app.route('/api/news/market/<region>')
+@audit_log
+def get_market_news(region):
+    """
+    Get news and sentiment analysis for a specific market region.
+    Regions: US, HK, CHINA, TAIWAN
+    """
+    region = region.upper()
+    max_news = request.args.get('limit', 10, type=int)
+    
+    # Map regions to major index symbols
+    region_map = {
+        'US': '^GSPC',        # S&P 500
+        'HK': '^HSI',         # Hang Seng Index
+        'CHINA': '000001.SS',  # SSE Composite
+        'TAIWAN': '^TWII'     # TSEC Weighted
+    }
+    
+    symbol = region_map.get(region)
+    if not symbol:
+        return jsonify({
+            'success': False,
+            'error': f'Invalid region: {region}. Supported regions: US, HK, CHINA, TAIWAN'
+        }), 400
+    
+    try:
+        news = fetch_stock_news(symbol, max_news=max_news)
+        sentiment_results = analyze_news_sentiment(news)
+        
+        return jsonify({
+            'success': True,
+            'region': region,
+            'symbol': symbol,
+            'sentiment': sentiment_results
+        })
+    
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 400
+
+
 @app.route('/api/health')
 def health():
     """Health check endpoint for monitoring."""

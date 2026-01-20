@@ -45,89 +45,164 @@
 
         <!-- Main Content -->
         <main class="main-content">
-            <!-- Stock Info Bar -->
-            <div class="stock-info-bar" id="stockInfoBar">
-                <div class="stock-name">
-                    <h2 id="stockName">--</h2>
-                    <span class="stock-symbol" id="stockSymbol">--</span>
-                </div>
-                <div class="stock-price">
-                    <span class="current-price" id="currentPrice">--</span>
-                    <span class="price-change" id="priceChange">--</span>
-                </div>
-                <div class="stock-meta">
-                    <span id="stockSector">--</span>
-                    <span id="stockIndustry">--</span>
-                </div>
-            </div>
+            <!-- Tab Navigation -->
+            <nav class="tabs">
+                <button class="tab-btn active" data-tab="stock-analysis">
+                    📈 Stock Analysis
+                </button>
+                <button class="tab-btn" data-tab="market-news">
+                    🌍 Market News
+                </button>
+            </nav>
 
-            <!-- Charts Section -->
-            <div class="charts-section">
-                <div class="chart-container chart-price">
-                    <div class="chart-header">
-                        <h3>Price & Moving Averages</h3>
-                        <div class="chart-controls">
-                            <button id="chartTypeToggle" class="btn-toggle active" data-type="line">
-                                📈 Line
-                            </button>
-                            <button id="candlestickToggle" class="btn-toggle" data-type="candlestick">
-                                🕯️ Candlestick
-                            </button>
+            <!-- Stock Analysis Section -->
+            <div id="stockAnalysisSection" class="tab-section active">
+                <!-- Stock Info Bar -->
+                <div class="stock-info-bar" id="stockInfoBar">
+                    <div class="stock-name">
+                        <h2 id="stockName">--</h2>
+                        <span class="stock-symbol" id="stockSymbol">--</span>
+                    </div>
+                    <div class="stock-price">
+                        <span class="current-price" id="currentPrice">--</span>
+                        <span class="price-change" id="priceChange">--</span>
+                    </div>
+                    <div class="stock-meta">
+                        <span id="stockSector">--</span>
+                        <span id="stockIndustry">--</span>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="charts-section">
+                    <div class="chart-container chart-price">
+                        <div class="chart-header">
+                            <h3>Price & Moving Averages</h3>
+                            <div class="chart-controls">
+                                <button id="chartTypeToggle" class="btn-toggle active" data-type="line">
+                                    📈 Line
+                                </button>
+                                <button id="candlestickToggle" class="btn-toggle" data-type="candlestick">
+                                    🕯️ Candlestick
+                                </button>
+                            </div>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="priceChart"></canvas>
                         </div>
                     </div>
-                    <div class="chart-wrapper">
-                        <canvas id="priceChart"></canvas>
+
+                    <!-- Volume Chart -->
+                    <div class="chart-container chart-volume">
+                        <div class="chart-header">
+                            <h3>Volume</h3>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="volumeChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- MACD Chart -->
+                    <div class="chart-container chart-macd">
+                        <div class="chart-header">
+                            <h3>MACD</h3>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="macdChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- RSI Chart -->
+                    <div class="chart-container chart-rsi">
+                        <div class="chart-header">
+                            <h3>RSI (14)</h3>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="rsiChart"></canvas>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Volume Chart -->
-                <div class="chart-container chart-volume">
-                    <div class="chart-header">
-                        <h3>Volume</h3>
+                <!-- Signals & News Section -->
+                <div class="bottom-section">
+                    <!-- Technical Signals -->
+                    <div class="signals-panel">
+                        <h3>📈 Technical Signals</h3>
+                        <div class="signals-grid" id="signalsGrid">
+                            <div class="signal-card loading">Loading signals...</div>
+                        </div>
                     </div>
-                    <div class="chart-wrapper">
-                        <canvas id="volumeChart"></canvas>
-                    </div>
-                </div>
 
-                <!-- MACD Chart -->
-                <div class="chart-container chart-macd">
-                    <div class="chart-header">
-                        <h3>MACD</h3>
-                    </div>
-                    <div class="chart-wrapper">
-                        <canvas id="macdChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- RSI Chart -->
-                <div class="chart-container chart-rsi">
-                    <div class="chart-header">
-                        <h3>RSI (14)</h3>
-                    </div>
-                    <div class="chart-wrapper">
-                        <canvas id="rsiChart"></canvas>
+                    <!-- News Sentiment -->
+                    <div class="news-panel">
+                        <h3>📰 News Sentiment</h3>
+                        <div class="sentiment-summary" id="sentimentSummary">
+                            <div class="loading">Loading news...</div>
+                        </div>
+                        <div class="news-list" id="newsList">
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Signals & News Section -->
-            <div class="bottom-section">
-                <!-- Technical Signals -->
-                <div class="signals-panel">
-                    <h3>📈 Technical Signals</h3>
-                    <div class="signals-grid" id="signalsGrid">
-                        <div class="signal-card loading">Loading signals...</div>
+            <!-- Market News Section -->
+            <div id="marketNewsSection" class="tab-section">
+                <div class="market-news-header">
+                    <h2>🌍 Global Market Sentiment</h2>
+                    <div class="market-controls">
+                        <label for="newsLimit">Show Top:</label>
+                        <select id="newsLimit">
+                            <option value="5">5 Articles</option>
+                            <option value="10" selected>10 Articles</option>
+                            <option value="20">20 Articles</option>
+                            <option value="30">30 Articles</option>
+                        </select>
                     </div>
                 </div>
 
-                <!-- News Sentiment -->
-                <div class="news-panel">
-                    <h3>📰 News Sentiment</h3>
-                    <div class="sentiment-summary" id="sentimentSummary">
-                        <div class="loading">Loading news...</div>
+                <div class="market-grid">
+                    <!-- US Market -->
+                    <div class="market-card" data-region="US">
+                        <div class="market-card-header">
+                            <h3>🇺🇸 US Market (S&P 500)</h3>
+                            <div class="market-sentiment-badge" id="sentiment-US">--</div>
+                        </div>
+                        <div class="market-news-list" id="news-US">
+                            <div class="loading">Loading US news...</div>
+                        </div>
                     </div>
-                    <div class="news-list" id="newsList">
+
+                    <!-- HK Market -->
+                    <div class="market-card" data-region="HK">
+                        <div class="market-card-header">
+                            <h3>🇭🇰 HK Market (HSI)</h3>
+                            <div class="market-sentiment-badge" id="sentiment-HK">--</div>
+                        </div>
+                        <div class="market-news-list" id="news-HK">
+                            <div class="loading">Loading HK news...</div>
+                        </div>
+                    </div>
+
+                    <!-- China Market -->
+                    <div class="market-card" data-region="CHINA">
+                        <div class="market-card-header">
+                            <h3>🇨🇳 China Market (SSE)</h3>
+                            <div class="market-sentiment-badge" id="sentiment-CHINA">--</div>
+                        </div>
+                        <div class="market-news-list" id="news-CHINA">
+                            <div class="loading">Loading China news...</div>
+                        </div>
+                    </div>
+
+                    <!-- Taiwan Market -->
+                    <div class="market-card" data-region="TAIWAN">
+                        <div class="market-card-header">
+                            <h3>🇹🇼 Taiwan Market (TWII)</h3>
+                            <div class="market-sentiment-badge" id="sentiment-TAIWAN">--</div>
+                        </div>
+                        <div class="market-news-list" id="news-TAIWAN">
+                            <div class="loading">Loading Taiwan news...</div>
+                        </div>
                     </div>
                 </div>
             </div>

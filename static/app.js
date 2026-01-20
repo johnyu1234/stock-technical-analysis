@@ -99,7 +99,106 @@ function setupEventListeners() {
             selectedIndex = -1;
         }
     });
+
+    // Tab buttons
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    tabButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabName = btn.getAttribute('data-tab');
+            switchTab(tabName);
+        });
+    });
+
+    // Market news limit selector
+    const newsLimitSelect = document.getElementById('newsLimit');
+    if (newsLimitSelect) {
+        newsLimitSelect.addEventListener('change', () => {
+            loadAllMarketNews();
+        });
+    }
 }
+
+function switchTab(tabName) {
+    // Update button states
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-tab') === tabName);
+    });
+
+    // Update section visibility
+    document.querySelectorAll('.tab-section').forEach(section => {
+        section.classList.toggle('active', section.id === (tabName === 'stock-analysis' ? 'stockAnalysisSection' : 'marketNewsSection'));
+    });
+
+    // Load market news if switching to that tab
+    if (tabName === 'market-news') {
+        loadAllMarketNews();
+    }
+}
+
+async function loadAllMarketNews() {
+    const regions = ['US', 'HK', 'CHINA', 'TAIWAN'];
+    const limit = document.getElementById('newsLimit').value;
+
+    regions.forEach(region => {
+        fetchMarketNews(region, limit);
+    });
+}
+
+async function fetchMarketNews(region, limit) {
+    const newsContainer = document.getElementById(`news-${region}`);
+    const sentimentBadge = document.getElementById(`sentiment-${region}`);
+
+    try {
+        const response = await fetch(`/api/news/market/${region}?limit=${limit}`);
+        const data = await response.json();
+
+        if (data.success) {
+            renderMarketNews(region, data.sentiment);
+        } else {
+            newsContainer.innerHTML = `<div class="error">Error: ${data.error}</div>`;
+        }
+    } catch (error) {
+        console.error(`Error fetching news for ${region}:`, error);
+        newsContainer.innerHTML = `<div class="error">Failed to load news</div>`;
+    }
+}
+
+function renderMarketNews(region, sentiment) {
+    const newsContainer = document.getElementById(`news-${region}`);
+    const sentimentBadge = document.getElementById(`sentiment-${region}`);
+
+    // Update sentiment badge
+    const overall = sentiment.overall;
+    sentimentBadge.textContent = overall.label;
+    sentimentBadge.className = `market-sentiment-badge ${overall.label.toLowerCase()}`;
+
+    // Update news list
+    if (sentiment.articles && sentiment.articles.length > 0) {
+        newsContainer.innerHTML = sentiment.articles.map(article => {
+            const s = article.sentiment;
+            const badgeClass = `badge-${s.label.toLowerCase()}`;
+            const itemClass = s.label.toLowerCase();
+
+            return `
+                <a href="${article.link || '#'}" target="_blank" class="news-item-link ${!article.link ? 'no-link' : ''}">
+                    <div class="news-item ${itemClass}">
+                        <div class="news-title">
+                            ${article.title}
+                            <span class="news-sentiment-badge ${badgeClass}">${s.label}</span>
+                            ${article.link ? '<span class="link-icon">🔗</span>' : ''}
+                        </div>
+                        <div class="news-meta">
+                            ${article.publisher} | ${article.publish_time}
+                        </div>
+                    </div>
+                </a>
+            `;
+        }).join('');
+    } else {
+        newsContainer.innerHTML = '<div class="news-empty">No news available for this market.</div>';
+    }
+}
+
 
 function setChartType(type) {
     if (chartType === type) return;
