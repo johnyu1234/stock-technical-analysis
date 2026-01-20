@@ -1,11 +1,23 @@
 """
 Stock Data Fetcher Module
 Fetches US stock market data using Yahoo Finance API.
+With audit logging for external API calls.
 """
 
 import yfinance as yf
 import pandas as pd
 from datetime import datetime
+
+# Import audit logging (graceful fallback if not available)
+try:
+    from database import log_external_call
+    AUDIT_ENABLED = True
+except ImportError:
+    AUDIT_ENABLED = False
+    from contextlib import contextmanager
+    @contextmanager
+    def log_external_call(*args, **kwargs):
+        yield {}
 
 
 def fetch_stock_data(symbol: str, period: str = "6mo", interval: str = "1d") -> pd.DataFrame:
@@ -22,7 +34,15 @@ def fetch_stock_data(symbol: str, period: str = "6mo", interval: str = "1d") -> 
     """
     try:
         ticker = yf.Ticker(symbol)
-        df = ticker.history(period=period, interval=interval)
+        
+        # Log external API call
+        with log_external_call(
+            service_name='yahoo_finance',
+            endpoint_url=f'yfinance.Ticker({symbol}).history',
+            request_payload={'symbol': symbol, 'period': period, 'interval': interval}
+        ) as ctx:
+            df = ticker.history(period=period, interval=interval)
+            ctx['response'] = {'rows': len(df), 'columns': list(df.columns) if not df.empty else []}
         
         if df.empty:
             raise ValueError(f"No data found for symbol: {symbol}")
@@ -49,7 +69,15 @@ def get_stock_info(symbol: str) -> dict:
     """
     try:
         ticker = yf.Ticker(symbol)
-        info = ticker.info
+        
+        # Log external API call
+        with log_external_call(
+            service_name='yahoo_finance',
+            endpoint_url=f'yfinance.Ticker({symbol}).info',
+            request_payload={'symbol': symbol}
+        ) as ctx:
+            info = ticker.info
+            ctx['response'] = {'fields_returned': len(info) if info else 0}
         
         return {
             'name': info.get('longName', symbol),
@@ -74,3 +102,4 @@ if __name__ == "__main__":
     info = get_stock_info("TSLA")
     for key, value in info.items():
         print(f"  {key}: {value}")
+

@@ -1,19 +1,36 @@
 """
 Flask API Server for Stock Technical Analysis
 Serves stock data, technical indicators, and news sentiment to the frontend.
+With MySQL audit logging for request/response tracking.
 """
 
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 import os
+import logging
 
 from stock_fetcher import fetch_stock_data, get_stock_info
 from technical_analysis import apply_all_indicators, analyze_signals, get_buy_sell_recommendations
 from news_sentiment import fetch_stock_news, analyze_news_sentiment
 from stock_search import search_stocks
 
+# Audit logging imports
+try:
+    from database import init_connection_pool, audit_log, close_pool, health_check
+    AUDIT_ENABLED = True
+except ImportError:
+    AUDIT_ENABLED = False
+    logging.warning("Database module not available. Audit logging disabled.")
+    # Create a no-op decorator when audit is disabled
+    def audit_log(func):
+        return func
+
 app = Flask(__name__, static_folder='static')
 CORS(app)
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 @app.route('/')
@@ -23,6 +40,7 @@ def index():
 
 
 @app.route('/api/stock/<symbol>')
+@audit_log
 def get_stock_data(symbol):
     """
     Get stock data with technical indicators.
@@ -88,6 +106,7 @@ def get_stock_data(symbol):
 
 
 @app.route('/api/news/<symbol>')
+@audit_log
 def get_news(symbol):
     """Get news and sentiment analysis for a stock."""
     max_news = request.args.get('limit', 10, type=int)
@@ -110,6 +129,7 @@ def get_news(symbol):
 
 
 @app.route('/api/search')
+@audit_log
 def search():
     """Search for stock symbols by name or symbol."""
     query = request.args.get('q', '').strip()
@@ -125,12 +145,46 @@ def search():
     })
 
 
+@app.route('/api/health')
+def health():
+    """Health check endpoint for monitoring."""
+    db_healthy = False
+    if AUDIT_ENABLED:
+        try:
+            db_healthy = health_check()
+        except Exception:
+            db_healthy = False
+    
+    return jsonify({
+        'status': 'healthy',
+        'audit_logging': AUDIT_ENABLED,
+        'database_connected': db_healthy
+    })
+
+
 if __name__ == '__main__':
     # Create static folder if it doesn't exist
     os.makedirs('static', exist_ok=True)
     
+    # Initialize database connection pool for audit logging
+    if AUDIT_ENABLED:
+        try:
+            init_connection_pool()
+            logger.info("✅ Audit logging database initialized")
+        except Exception as e:
+            logger.warning(f"⚠️ Audit logging disabled: {e}")
+    
     print("\n🚀 Starting Stock Analysis Dashboard...")
     print("📊 Open http://localhost:5000 in your browser")
+    if AUDIT_ENABLED:
+        print("📝 Audit logging: ENABLED")
+    else:
+        print("📝 Audit logging: DISABLED")
     print("Press Ctrl+C to stop\n")
     
-    app.run(debug=True, port=5000)
+    try:
+        app.run(debug=True, port=5000)
+    finally:
+        if AUDIT_ENABLED:
+            close_pool()
+

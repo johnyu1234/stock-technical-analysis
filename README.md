@@ -53,9 +53,36 @@ Open **http://localhost:5000** in your browser.
 
 ## Technologies
 
-- **Backend**: Flask, yfinance, pandas, ta, NLTK VADER
 - **Frontend**: Chart.js, chartjs-chart-financial, Luxon
+- **Database**: MySQL 8.0 (Audit Logging)
 - **Data Source**: Yahoo Finance API
+
+## Audit Logging
+
+The application includes a comprehensive audit logging system to track internal API requests and external calls to Yahoo Finance.
+
+### Features
+- 🛡️ **Request/Response Logging**: Records all internal Flask API hits.
+- 🌐 **External Call Tracking**: Logs all outgoing requests to Yahoo Finance.
+- 📉 **Performance Metrics**: Automatically aggregates daily performance data.
+- 🧹 **Auto-Cleanup**: Automated 30-day data retention cleanup.
+- 🛡️ **Data Privacy**: Automatic truncation of large bodies and sanitization of sensitive headers.
+
+### Setup (Docker)
+
+1. **Configure Environment**:
+   Copy `.env.example` to `.env` and update your database credentials:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **Start MySQL**:
+   ```bash
+   docker compose up -d
+   ```
+
+3. **Check Health**:
+   Verify connection at `http://localhost:5000/api/health`.
 
 ## Buy/Sell Algorithm
 
